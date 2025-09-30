@@ -226,8 +226,52 @@ services:
     environment:
       LS_JAVA_OPTS: "-Xms1g -Xmx1g"
 ```
-6. Update Dockerfile (remove the install line)
+6. build and run Logstash
 
-Replace C:\Users\dell\oracle-to-es\Dockerfile with this exact content:
+```
+cd C:\Users\dell\elasticsearch-docker
 
+# (Optional) Validate YAML
+docker compose config
+
+# Rebuild without cache to ensure it picks up the new Dockerfile
+docker compose build --no-cache logstash
+
+# Start the service
+docker compose up -d logstash
+
+# Tail logs to verify JDBC driver is loaded and pipeline is running
+docker logs -f ls01
+
+```
+Step 4 Verify docs landed in Elasticsearch
+
+Open Kibana → Dev Tools and run:
+```
+GET oracle_elser_index/_count
+
+GET oracle_elser_index/_search
+{
+  "size": 5,
+  "_source": ["id","title","content","ml.tokens","updated_at"]
+}
+
+```
+2 Ensure the ELSER ingest pipeline exists
+
+```
+PUT _ingest/pipeline/elser_v2_pipeline
+{
+  "processors": [
+    {
+      "inference": {
+        "model_id": ".elser_model_2_linux-x86_64",
+        "input_output": [
+          { "input_field": "content", "output_field": "ml.tokens" }
+        ],
+        "inference_config": { "text_expansion": {} }
+      }
+    }
+  ]
+}
 ```
