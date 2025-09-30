@@ -242,7 +242,6 @@ docker compose up -d logstash
 
 # Tail logs to verify JDBC driver is loaded and pipeline is running
 docker logs -f ls01
-
 ```
 Step 4 Verify docs landed in Elasticsearch
 
@@ -255,7 +254,6 @@ GET oracle_elser_index/_search
   "size": 5,
   "_source": ["id","title","content","ml.tokens","updated_at"]
 }
-
 ```
 2 Ensure the ELSER ingest pipeline exists
 
@@ -298,13 +296,11 @@ PUT oracle_elser_index
     }
   }
 }
-
 ```
 If the index already exists with the wrong mapping, delete it first:
 
 ```
 DELETE oracle_elser_index
-
 ```
 4 Semantic search test (ELSER)
 
@@ -324,5 +320,4 @@ POST oracle_elser_index/_search
   },
   "_source": ["title","content","updated_at"]
 }
-
 ```
