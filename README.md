@@ -275,3 +275,54 @@ PUT _ingest/pipeline/elser_v2_pipeline
   ]
 }
 ```
+
+3 Create mapping (if index missing)
+
+If oracle_elser_index didn’t exist, create it before Logstash writes (or after deleting it if you want a clean start):
+
+```
+PUT oracle_elser_index
+{
+  "mappings": {
+    "properties": {
+      "id":         { "type": "long" },
+      "title":      { "type": "text" },
+      "body":       { "type": "text" },
+      "content":    { "type": "text" },
+      "updated_at": { "type": "date" },
+      "ml": {
+        "properties": {
+          "tokens": { "type": "rank_features" }
+        }
+      }
+    }
+  }
+}
+
+```
+If the index already exists with the wrong mapping, delete it first:
+
+```
+DELETE oracle_elser_index
+
+```
+4 Semantic search test (ELSER)
+
+Once documents exist and ml.tokens is populated via the pipeline, test:
+
+```
+POST oracle_elser_index/_search
+{
+  "size": 5,
+  "query": {
+    "text_expansion": {
+      "ml.tokens": {
+        "model_id": ".elser_model_2_linux-x86_64",
+        "model_text": "who set records in long distance running?"
+      }
+    }
+  },
+  "_source": ["title","content","updated_at"]
+}
+
+```
