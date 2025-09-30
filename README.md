@@ -46,8 +46,8 @@ CREATE TABLE docs (
 );
 
 CREATE INDEX docs_updated_at_idx ON docs (updated_at);
-
--- Insert a few rows into docs
+```
+Insert a few rows into docs
 ```
 INSERT INTO docs (title, body) VALUES (
   'Bekele records',
@@ -66,3 +66,15 @@ INSERT INTO docs (title, body) VALUES (
 
 COMMIT;
 ```
+Run these, then 👉 You should see 3 rows:
+
+```
+SELECT id, title, SUBSTR(body,1,80) AS body_preview, updated_at
+FROM docs
+ORDER BY id;
+```
+
+Step 3 — Logstash JDBC pipeline (Docker)
+
+1. Make folders for the Logstash build
+
