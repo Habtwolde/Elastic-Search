@@ -163,22 +163,20 @@ output {
 ```
 4 Create a Dockerfile for Logstash
 
-```powershell
-@'
+```
 FROM docker.elastic.co/logstash/logstash:8.14.3
 
-# Install JDBC input plugin
-RUN logstash-plugin install logstash-input-jdbc
+# No need to install the jdbc plugin; it's included via logstash-integration-jdbc
 
 # Drivers + pipeline
 COPY drivers/ojdbc8.jar /usr/share/logstash/drivers/ojdbc8.jar
 COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
-'@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\Dockerfile
+
 ```
 
 5 Add Logstash to your existing docker-compose.yml (Replace it)
 
-```powershell
+```
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
@@ -227,4 +225,9 @@ services:
       - elasticsearch
     environment:
       LS_JAVA_OPTS: "-Xms1g -Xmx1g"
+```
+6. Update Dockerfile (remove the install line)
+
+Replace C:\Users\dell\oracle-to-es\Dockerfile with this exact content:
+
 ```
