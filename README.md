@@ -92,7 +92,7 @@ C:\Users\dell\oracle-to-es\drivers\ojdbc8.jar
 ```
 
 3 Create the Logstash pipeline config
-```powershell
+```
 
 @'
 input {
@@ -159,7 +159,6 @@ output {
   stdout { codec => json_lines }
 }
 '@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\pipeline\logstash.conf
-
 ```
 4 Create a Dockerfile for Logstash
 
@@ -171,7 +170,6 @@ FROM docker.elastic.co/logstash/logstash:8.14.3
 # Drivers + pipeline
 COPY drivers/ojdbc8.jar /usr/share/logstash/drivers/ojdbc8.jar
 COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
-
 ```
 
 5 Add Logstash to your existing docker-compose.yml (Replace it)
