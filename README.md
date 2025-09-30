@@ -46,4 +46,23 @@ CREATE TABLE docs (
 );
 
 CREATE INDEX docs_updated_at_idx ON docs (updated_at);
+
+-- Insert a few rows into docs
+```
+INSERT INTO docs (title, body) VALUES (
+  'Bekele records',
+  'Kenenisa Bekele set multiple world records in long-distance running.'
+);
+
+INSERT INTO docs (title, body) VALUES (
+  'USMNT Gold Cup',
+  'U.S. men''s national team won the Gold Cup in a thrilling penalty shootout.'
+);
+
+INSERT INTO docs (title, body) VALUES (
+  'Jamaica weather',
+  'Heavy rainfall caused flooding in Jamaica and disrupted travel.'
+);
+
+COMMIT;
 ```
