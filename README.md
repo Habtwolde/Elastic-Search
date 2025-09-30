@@ -77,4 +77,154 @@ ORDER BY id;
 Step 3 — Logstash JDBC pipeline (Docker)
 
 1. Make folders for the Logstash build
+```powershell
 
+mkdir C:\Users\dell\oracle-to-es\pipeline -Force | Out-Null
+mkdir C:\Users\dell\oracle-to-es\drivers  -Force | Out-Null
+```
+
+2 Put the Oracle JDBC driver in place
+
+Download Oracle’s JDBC JAR (e.g., ojdbc8.jar) requires accepting Oracle’s license, so download it manually in your browser from Oracle and save it to:
+
+```vbnet
+C:\Users\dell\oracle-to-es\drivers\ojdbc8.jar
+```
+
+3 Create the Logstash pipeline config
+```powershell
+
+@'
+input {
+  jdbc {
+    jdbc_driver_library => "/usr/share/logstash/drivers/ojdbc8.jar"
+    jdbc_driver_class   => "Java::oracle.jdbc.OracleDriver"
+    jdbc_connection_string => "jdbc:oracle:thin:@//host.docker.internal:1521/XEPDB1"
+    jdbc_user => "es_user"
+    jdbc_password => "EsUserPass#2025"
+
+    # Incremental ingestion based on updated_at
+    schedule => "* * * * *"   # run every minute
+    use_column_value => false
+    tracking_column => "updated_at"
+    tracking_column_type => "timestamp"
+    last_run_metadata_path => "/usr/share/logstash/.logstash_jdbc_last_run"
+
+    # Only pick rows newer than the last run (sql_last_value is a timestamp)
+    statement => "
+      SELECT
+        id,
+        title,
+        body,
+        updated_at
+      FROM docs
+      WHERE updated_at > :sql_last_value
+      ORDER BY updated_at ASC
+    "
+
+    # fetch size can be tuned for larger tables
+    jdbc_fetch_size => 200
+    clean_run => false
+  }
+}
+
+filter {
+  # Build a single text field for ELSER to embed
+  mutate {
+    copy => { "title" => "[_compose][title]" }
+  }
+  mutate {
+    update => { "[@metadata][doc_id]" => "%{id}" }
+    # Create 'content' = title + newline + body
+    add_field => { "content" => "%{[_compose][title]}\n%{[body]}" }
+  }
+  mutate { remove_field => ["_compose"] }
+}
+
+output {
+  elasticsearch {
+    hosts => [ "http://elasticsearch:9200" ]
+    user  => "elastic"
+    password => "changeme"
+    index => "oracle_elser_index"
+
+    # Crucial: run through your ELSER ingest pipeline to populate ml.tokens
+    pipeline => "elser_v2_pipeline"
+
+    # Optional: stable IDs from Oracle 'id'
+    document_id => "%{[@metadata][doc_id]}"
+    doc_as_upsert => true
+    action => "index"
+  }
+  stdout { codec => json_lines }
+}
+'@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\pipeline\logstash.conf
+
+```
+4 Create a Dockerfile for Logstash
+
+```powershell
+@'
+FROM docker.elastic.co/logstash/logstash:8.14.3
+
+# Install JDBC input plugin
+RUN logstash-plugin install logstash-input-jdbc
+
+# Drivers + pipeline
+COPY drivers/ojdbc8.jar /usr/share/logstash/drivers/ojdbc8.jar
+COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+'@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\Dockerfile
+```
+
+5 Add Logstash to your existing docker-compose.yml (Replace it)
+
+```powershell
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: es01
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.license.self_generated.type=trial
+      - xpack.ml.enabled=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - ELASTIC_PASSWORD=changeme
+      - xpack.ml.model_repository=file:///usr/share/elasticsearch/config/models
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      # Map the *subfolder* so it becomes the repo root in the container
+      - type: bind
+        source: "C:\\ml-models\\.elser_model_2_linux-x86_64"
+        target: /usr/share/elasticsearch/config/models
+        read_only: true
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: kb01
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=kibana_password123
+      - SERVER_PUBLICBASEURL=http://localhost:5601
+      - SERVER_HOST=0.0.0.0
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    ports:
+      - "5601:5601"
+  logstash:
+    build:
+      context: "C:\\Users\\dell\\oracle-to-es"
+    container_name: ls01
+    depends_on:
+      - elasticsearch
+    environment:
+      LS_JAVA_OPTS: "-Xms1g -Xmx1g"
+```
