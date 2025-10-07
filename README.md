@@ -163,13 +163,17 @@ output {
 4 Create a Dockerfile for Logstash
 
 ```
+@'
 FROM docker.elastic.co/logstash/logstash:8.14.3
 
-# No need to install the jdbc plugin; it's included via logstash-integration-jdbc
+# Install JDBC input plugin
+RUN logstash-plugin install logstash-input-jdbc
 
 # Drivers + pipeline
 COPY drivers/ojdbc8.jar /usr/share/logstash/drivers/ojdbc8.jar
 COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+'@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\Dockerfile
+
 ```
 
 5 Add Logstash to your existing docker-compose.yml (Replace it)
