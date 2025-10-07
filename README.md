@@ -91,7 +91,7 @@ Download Oracle’s JDBC JAR (e.g., ojdbc8.jar) requires accepting Oracle’s li
 C:\Users\dell\oracle-to-es\drivers\ojdbc8.jar
 ```
 
-3 Create the Logstash pipeline config
+3 Create the Logstash pipeline config ( In Powershell)
 ```
 
 @'
@@ -160,7 +160,7 @@ output {
 }
 '@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\pipeline\logstash.conf
 ```
-4 Create a Dockerfile for Logstash
+4 Create a Dockerfile for Logstash (In Powershell)
 
 ```
 @'
