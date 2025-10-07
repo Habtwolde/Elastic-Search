@@ -318,8 +318,16 @@ POST oracle_elser_index/_search
         "model_id": ".elser_model_2_linux-x86_64",
         "model_text": "who set records in long distance running?"
       }
+
+
     }
   },
   "_source": ["title","content","updated_at"]
 }
+```
+
+```
+curl -u elastic:changeme -H 'Content-Type: application/json' \
+  -X POST http://localhost:9200/_security/user/kibana_system/_password \
+  -d '{"password":"kibana_password123"}'
 ```
