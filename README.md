@@ -91,26 +91,35 @@ Download Oracle’s JDBC JAR (e.g., ojdbc8.jar) requires accepting Oracle’s li
 C:\Users\dell\oracle-to-es\drivers\ojdbc8.jar
 ```
 
-3 Create the Logstash pipeline config ( In Powershell)
+3 Create the Logstash pipeline config file logstash.config file in C:\Users\dell\oracle-to-es\pipeline and paste this 
 ```
 
-@'
 input {
   jdbc {
     jdbc_driver_library => "/usr/share/logstash/drivers/ojdbc8.jar"
     jdbc_driver_class   => "Java::oracle.jdbc.OracleDriver"
+
+    # Connect from container → Windows host Oracle XE
     jdbc_connection_string => "jdbc:oracle:thin:@//host.docker.internal:1521/XEPDB1"
-    jdbc_user => "es_user"
+    jdbc_user     => "es_user"
     jdbc_password => "EsUserPass#2025"
 
-    # Incremental ingestion based on updated_at
-    schedule => "* * * * *"   # run every minute
+    jdbc_validate_connection => true
+    jdbc_fetch_size => 200
+    jdbc_default_timezone => "UTC"
+
+    # Run every minute (adjust later)
+    schedule => "* * * * *"
+
+    # Track by timestamp column
     use_column_value => false
     tracking_column => "updated_at"
     tracking_column_type => "timestamp"
+    record_last_run => true
     last_run_metadata_path => "/usr/share/logstash/.logstash_jdbc_last_run"
 
-    # Only pick rows newer than the last run (sql_last_value is a timestamp)
+    # Important: handle first run via NVL(:sql_last_value, ...) so it loads everything once,
+    # then only rows with updated_at > last checkpoint.
     statement => "
       SELECT
         id,
@@ -118,63 +127,68 @@ input {
         body,
         updated_at
       FROM docs
-      WHERE updated_at > :sql_last_value
+      WHERE updated_at > NVL(:sql_last_value, TO_TIMESTAMP('1970-01-01','YYYY-MM-DD'))
       ORDER BY updated_at ASC
     "
-
-    # fetch size can be tuned for larger tables
-    jdbc_fetch_size => 200
-    clean_run => false
   }
 }
 
 filter {
-  # Build a single text field for ELSER to embed
+  # Build a single text field for ELSER to embed (title + newline + body)
   mutate {
-    copy => { "title" => "[_compose][title]" }
+    # guard against nulls; Logstash treats missing as ''
+    add_field => { "content" => "%{title}\n%{body}" }
   }
-  mutate {
-    update => { "[@metadata][doc_id]" => "%{id}" }
-    # Create 'content' = title + newline + body
-    add_field => { "content" => "%{[_compose][title]}\n%{[body]}" }
-  }
-  mutate { remove_field => ["_compose"] }
+
+  # Stable ES _id from Oracle id
+  mutate { update => { "[@metadata][doc_id]" => "%{id}" } }
 }
 
 output {
   elasticsearch {
-    hosts => [ "http://elasticsearch:9200" ]
-    user  => "elastic"
+    hosts    => ["http://elasticsearch:9200"]
+    user     => "elastic"
     password => "changeme"
-    index => "oracle_elser_index"
 
-    # Crucial: run through your ELSER ingest pipeline to populate ml.tokens
-    pipeline => "elser_v2_pipeline"
+    index    => "oracle_elser_index"
+    pipeline => "elser_v2_pipeline"   # ⇐ runs ELSER inference to produce ml.tokens
 
-    # Optional: stable IDs from Oracle 'id'
-    document_id => "%{[@metadata][doc_id]}"
+    document_id   => "%{[@metadata][doc_id]}"
     doc_as_upsert => true
-    action => "index"
+    action        => "index"
   }
+
+  # Useful while testing
   stdout { codec => json_lines }
 }
-'@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\pipeline\logstash.conf
-```
-4 Create a Dockerfile for Logstash (In Powershell)
 
 ```
+4 Create a Dockerfile Dockerfile Logstash in C:\Users\dell\oracle-to-es 
+In Powwershell
+
+```powershell
 @'
 FROM docker.elastic.co/logstash/logstash:8.14.3
-
-# Install JDBC input plugin
-RUN logstash-plugin install logstash-input-jdbc
 
 # Drivers + pipeline
 COPY drivers/ojdbc8.jar /usr/share/logstash/drivers/ojdbc8.jar
 COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+
 '@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\Dockerfile
 
 ```
+Or paste this
+```
+
+FROM docker.elastic.co/logstash/logstash:8.14.3
+
+# Drivers + pipeline
+COPY drivers/ojdbc8.jar /usr/share/logstash/drivers/ojdbc8.jar
+COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+
+```
+
+
 
 5 Add Logstash to your existing docker-compose.yml (Replace it)
 
