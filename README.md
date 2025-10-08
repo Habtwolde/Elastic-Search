@@ -163,8 +163,7 @@ output {
 }
 
 ```
-4 Create a Dockerfile Dockerfile Logstash in C:\Users\dell\oracle-to-es 
-In Powwershell
+4 Create a Dockerfile Dockerfile Logstash in C:\Users\dell\oracle-to-es In Powwershell
 
 ```powershell
 @'
@@ -177,7 +176,7 @@ COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
 '@ | Set-Content -Encoding ASCII C:\Users\dell\oracle-to-es\Dockerfile
 
 ```
-Or paste this
+Or paste this in to Docker file
 ```
 
 FROM docker.elastic.co/logstash/logstash:8.14.3
