@@ -91,7 +91,7 @@ Download Oracle’s JDBC JAR (e.g., ojdbc8.jar) requires accepting Oracle’s li
 C:\Users\dell\oracle-to-es\drivers\ojdbc8.jar
 ```
 
-3 Create the Logstash pipeline config file logstash.config file in C:\Users\dell\oracle-to-es\pipeline and paste this 
+3 Create the Logstash.config pipeline in C:\Users\dell\oracle-to-es\pipeline and paste this 
 
 ```
 input {
