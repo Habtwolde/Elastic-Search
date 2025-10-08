@@ -74,7 +74,7 @@ FROM docs
 ORDER BY id;
 ```
 
-Step 3 — Logstash JDBC pipeline (Docker)
+Step 2 — Logstash JDBC pipeline (Docker)
 
 1. Make folders for the Logstash build
 ```powershell
@@ -259,7 +259,7 @@ docker compose up -d logstash
 # Tail logs to verify JDBC driver is loaded and pipeline is running
 docker logs -f ls01
 ```
-Step 4 Verify docs landed in Elasticsearch
+Step 3 Verify docs landed in Elasticsearch
 
 Open Kibana → Dev Tools and run:
 ```
