@@ -92,8 +92,8 @@ C:\Users\dell\oracle-to-es\drivers\ojdbc8.jar
 ```
 
 3 Create the Logstash pipeline config file logstash.config file in C:\Users\dell\oracle-to-es\pipeline and paste this 
-```
 
+```
 input {
   jdbc {
     jdbc_driver_library => "/usr/share/logstash/drivers/ojdbc8.jar"
