@@ -263,12 +263,15 @@ Step 3 Verify docs landed in Elasticsearch
 Open Kibana → Dev Tools and run:
 ```
 GET oracle_elser_index/_count
-
 GET oracle_elser_index/_search
 {
-  "size": 5,
+  "size": 3,
+  "sort": [{ "updated_at": "desc" }],
   "_source": ["id","title","content","ml.tokens","updated_at"]
 }
+
+GET _ml/trained_models/.elser_model_2_linux-x86_64/_stats
+GET _ingest/pipeline/elser_v2_pipeline
 ```
 2 Ensure the ELSER ingest pipeline exists
 
