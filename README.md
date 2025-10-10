@@ -737,7 +737,27 @@ if __name__ == "__main__":
     main()
 
 ```
+Start Elasticsearch with ELSER model available (self-managed Docker or Elastic Cloud).
+Then configure:
 
+```
+PUT _ingest/pipeline/elser_v2_pipeline
+{
+  "processors": [
+    {
+      "inference": {
+        "model_id": ".elser_model_2_linux-x86_64",
+        "input_output": [
+          { "input_field": "content", "output_field": "ml.tokens" }
+        ],
+        "inference_config": { "text_expansion": {} }
+      }
+    }
+  ]
+}
+
+
+```
 
 ```
 curl -u elastic:changeme -H 'Content-Type: application/json' \
