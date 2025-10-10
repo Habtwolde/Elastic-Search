@@ -758,6 +758,16 @@ PUT _ingest/pipeline/elser_v2_pipeline
 
 
 ```
+Excel / CSV Ingest Example
+
+```
+python ingest_or_query_elser.py --mode excel --index excel_elser_index `
+  --file "C:\Users\dell\elser-python\long_distance_runners_record.xlsx" `
+  --sheet Sheet1 `
+  --id-col "Runner ID" --title-col "Name" --body-col "Event" `
+  --query "who set records in long distance running?"
+
+```
 
 ```
 curl -u elastic:changeme -H 'Content-Type: application/json' \
