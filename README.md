@@ -774,3 +774,43 @@ curl -u elastic:changeme -H 'Content-Type: application/json' \
   -X POST http://localhost:9200/_security/user/kibana_system/_password \
   -d '{"password":"kibana_password123"}'
 ```
+
+New .yml
+
+```
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: es01
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.ml.enabled=true
+      - xpack.license.self_generated.type=trial
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - ELASTIC_PASSWORD=changeme
+      - xpack.ml.model_repository=file:///usr/share/elasticsearch/config/models
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      # ✅ make sure this path exists on Windows
+      - type: bind
+        source: "C:\\ml-models\\.elser_model_2_linux-x86_64"
+        target: /usr/share/elasticsearch/config/models
+        read_only: true
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: kb01
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=kibana_password123
+    ports:
+      - "5601:5601"
+
+
+```
