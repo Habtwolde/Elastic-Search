@@ -1,35 +1,3 @@
-Run this inside Kibana Dev Tools (connected to Elasticsearch):
-
- ```   
-  POST _ml/trained_models/.elser_model_2_linux-x86_64/_download
-
- ```
-Deploy the model
-
- ```   
-  POST _ml/trained_models/.elser_model_2_linux-x86_64/deployment/_start
-
- ```
-
-Check its status:
- ```   
-  GET _ml/trained_models/.elser_model_2_linux-x86_64/_stats
-
- ```
-Verify pipeline
-
- ```   
-  GET _ingest/pipeline/elser_v2_pipeline
-
-
- ```
-
-
-
-
-
-
-
 Oracle → Elasticsearch with Logstash & ELSER
 
 Step 1 — Install Oracle Database Free (XE) on Windows and load sample data
