@@ -1,3 +1,21 @@
+
+ ```   
+  POST _ml/trained_models/.elser_model_2_linux-x86_64/_download
+
+ ```
+
+
+
+
+
+
+
+
+
+
+
+
+
 Oracle → Elasticsearch with Logstash & ELSER
 
 Step 1 — Install Oracle Database Free (XE) on Windows and load sample data
