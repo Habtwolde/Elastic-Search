@@ -84,7 +84,6 @@ verify it was running:
 
 ```
 GET _ml/trained_models/.elser_model_2_linux-x86_64/_stats
-
 ```
 
 Creating the Ingest Pipeline (Semantic Embedding)
@@ -104,8 +103,6 @@ PUT _ingest/pipeline/elser_v2_pipeline
     }
   ]
 }
-
-
 ```
 This will add ELSER embeddings to text automatically.
 
@@ -116,9 +113,9 @@ set up a virtual environment and installed everything required for Excel ingesti
 ```
 python -m venv .venv
 .venv\Scripts\activate
-
+```
+```
 pip install elasticsearch pandas openpyxl python-dateutil pymupdf
-
 ```
 
 Searching from Kibana
@@ -137,7 +134,6 @@ POST excel_elser_index/_search
   },
   "_source": ["Name","Event","Country","Date","Position"]
 }
-
 ```
 
 Searching from python 
@@ -440,8 +436,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 ```
 
 Optional 'ingest_to_es_elser.py'
@@ -845,5 +839,4 @@ python ingest_to_es_elser.py ^
   --title-col "Name" ^
   --body-col "Event" ^
   --query "who set records in long distance running?"
-
 ```
