@@ -1,7 +1,7 @@
 
 Docker Compose Setup (Elasticsearch + Kibana)
 
-You created docker-compose.yml like this:
+Replace the docker-compose.yml with this:
 
  ```   
   services:
@@ -56,7 +56,7 @@ You created docker-compose.yml like this:
 
 Registering the Model in Kibana → Dev Tools
 
-open Kibana Dev Tools and ran:
+open Kibana Dev Tools and run:
 
  ```
 PUT _ml/trained_models/.elser_model_2_linux-x86_64
@@ -70,7 +70,7 @@ PUT _ml/trained_models/.elser_model_2_linux-x86_64
 }
 
 ```
-Then deployed it:
+Then deploy it:
 
 ```
 POST _ml/trained_models/.elser_model_2_linux-x86_64/deployment/_start
