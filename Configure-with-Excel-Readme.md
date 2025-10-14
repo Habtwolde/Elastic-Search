@@ -829,6 +829,7 @@ if __name__ == "__main__":
 ```
 
 Run (Excel)
+Change the path to your excel file
 
 ```
 python ingest_to_es_elser.py ^
