@@ -26,4 +26,27 @@ Quick Elasticsearch via Docker
   -e "xpack.security.enabled=true" `
   -e "ELASTIC_PASSWORD=changeme" `
   docker.elastic.co/elasticsearch/elasticsearch:8.14.0
-Quick Elasticsearch via Docker
+```
+Check if it’s reachable:
+  ```powershell
+Invoke-RestMethod -Method GET -Uri "http://localhost:9200" `
+  -Authentication Basic `
+  -Credential (New-Object System.Management.Automation.PSCredential("elastic",(ConvertTo-SecureString "changeme" -AsPlainText -Force)))
+```
+Run the setup script (this creates venv, installs deps, and optionally starts ELSER):
+  ```powershell
+# Basic install (no ELSER start)
+.\setup_elser_env.ps1 -ProjectDir "." -EsUrl "http://localhost:9200" -EsUser "elastic" -EsPass "changeme"
+
+# Or, try to start ELSER too:
+.\setup_elser_env.ps1 -ProjectDir "." -EsUrl "http://localhost:9200" -EsUser "elastic" -EsPass "changeme" -StartElser
+```
+(Later, when opening a new shell) Activate the venv:
+  ```powershell
+. .\.venv\Scripts\Activate.ps1
+```
+Run the script
+```
+python run_bert_elser_test.py -f C:\Users\dell\elser-python\sample_descriptions.xlsx -c Description
+>> # then type queries at: query> 
+```
