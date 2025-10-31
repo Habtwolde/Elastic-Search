@@ -12,7 +12,7 @@ This project provides a simple CLI to index a spreadsheet (CSV/XLSX) into Elasti
 
 ---
 
-## ⚙️ 1. Prerequisites
+1. Prerequisites
 
 - **Windows 10/11** with **PowerShell**
 - **Python 3.9+** installed and available in PATH  
