@@ -47,7 +47,12 @@ Run the setup script (this creates venv, installs deps, and optionally starts EL
 ```
 Run the script, Interactive mode (type multiple queries)
 ```
-python run_bert_elser_test.py -f C:\Users\dell\elser-python\sample_descriptions.xlsx -c Description
+python run_bert_elser_test.py `
+  --file "C:\path\to\your\sheet.xlsx" `
+  --col "Description" `
+  --reindex
+# at the prompt: type queries; use :quit to exit
+
 ```
 One-shot query with reindex
 ```
