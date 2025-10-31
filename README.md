@@ -45,8 +45,15 @@ Run the setup script (this creates venv, installs deps, and optionally starts EL
   ```powershell
 . .\.venv\Scripts\Activate.ps1
 ```
-Run the script
+Run the script, Interactive mode (type multiple queries)
 ```
 python run_bert_elser_test.py -f C:\Users\dell\elser-python\sample_descriptions.xlsx -c Description
->> # then type queries at: query> 
+```
+One-shot query with reindex
+```
+python run_bert_elser_test.py `
+  --file "C:\path\to\your\sheet.xlsx" `
+  --col "Description" `
+  --query "BlueSky Airlines safety compliance" `
+  --reindex
 ```
