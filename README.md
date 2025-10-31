@@ -19,3 +19,8 @@ This project provides a simple CLI to index a spreadsheet (CSV/XLSX) into Elasti
   Check:
   ```powershell
   python --version
+docker run --name es8 -p 9200:9200 `
+  -e "discovery.type=single-node" `
+  -e "xpack.security.enabled=true" `
+  -e "ELASTIC_PASSWORD=changeme" `
+  docker.elastic.co/elasticsearch/elasticsearch:8.14.0
