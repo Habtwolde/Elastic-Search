@@ -50,5 +50,5 @@ PowerShell:
   ```powershell
 .\Recreate_the_endpoint.ps1
 ```
-3. Recreate the Index: Run all the cells of recreate_index.ipynb
-4. Run all the cells of ELSER_Search_Notebook_confirmed_not_in_kibana.ipynb
+3. Recreate the Index: Run all the cells of check.ipynb
+5. Run all the cells of ELSER_Search_Notebook_confirmed_not_in_kibana.ipynb
