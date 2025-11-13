@@ -1,0 +1,132 @@
+✅ 1. Start Neo4j with Docker (no Desktop at all)
+
+In PowerShell (or your terminal), run:
+
+docker run -d `
+  --name neo4j-people `
+  -p 7474:7474 -p 7687:7687 `
+  -e NEO4J_AUTH=neo4j/neo4j123 `
+  -v neo4j_data:/data `
+  -v neo4j_logs:/logs `
+  neo4j:5
+
+✅ 2. In PowerShell (or your terminal), run: You can check it’s running:
+
+docker ps
+
+✅ 3. Login to Neo4j Browser
+
+Open a browser and go to: http://localhost:7474
+Username/password: neo4j/neo4j123
+
+✅ 4. Set up your Python environment
+
+# (optional but recommended)
+python -m venv .venv
+.\.venv\Scripts\activate
+
+pip install neo4j pandas openpyxl
+
+✅ 5. Test Python connectivity
+
+Now run the following python script:
+
+from neo4j import GraphDatabase
+
+driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "neo4j123"))
+with driver.session() as s:
+    print(s.run("RETURN 1 AS ok").data())
+
+
+🚀 Now what we do next (Step-by-Step, from scratch)
+
+STEP 1 — Clear the database (optional, to start clean)
+
+In Neo4j Browser, run:
+
+MATCH (n) DETACH DELETE n;
+
+This resets everything.
+
+Then also reset constraints:
+
+DROP CONSTRAINT person_external_id IF EXISTS;
+
+STEP 2 — Create your project folder
+
+Create:  
+
+Neo4J-People/
+    enrich_people_v0.py
+    people_history.xlsx
+
+STEP 3 — Run it
+
+cd C:\Users\dell\Documents\Projects\Neo4J-People
+python enrich_people_v0.py
+
+STEP 6 — Verify in Browser
+
+Go to Neo4j Browser → run:
+
+MATCH (p:Person) RETURN p;
+
+STEP 7 — Retry deeper Mapping
+
+1️⃣ Wipe the database
+
+In the Neo4j Browser (where you already are), run:
+
+MATCH (n) DETACH DELETE n;
+
+2️⃣ Excel format for people + relationships
+
+Let’s assume your Excel file is called people_relations.xlsx in your project folder.
+
+Sheet can be Sheet1, with these columns:
+
+[check your people_history.xlsx in project folder]
+
+3️⃣ New script: enrich_people_v0.py
+
+The new script will do do three things:
+
+Wipe the current DB
+
+Define a slightly richer Excel format that carries relationship info
+
+Use a new Python script that:
+
+reads the Excel
+
+creates/updates Person, Organization, Location, Title, Skill nodes
+
+creates the relationships between them
+
+4️⃣ Run it
+
+   python enrich_people_v0.py
+
+5 Then, in Neo4j Browser, run:
+
+MATCH (p:Person)-[r]->(x)
+RETURN p, r, x;
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+For Regardless of the excel
+
+1️⃣  One-time Python setup
+
+In your project venv:
+
+pip install neo4j pandas openpyxl spacy pyyaml
+python -m spacy download en_core_web_sm
+
+2️⃣ Run
+
+MATCH (n) DETACH DELETE n;
+python descriptions_to_graph_generic.py
+
+MATCH (p:Person)-[r]->(x)
+RETURN p, r, x;
