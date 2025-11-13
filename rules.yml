@@ -1,0 +1,105 @@
+spacy_model: en_core_web_sm
+
+# Excel config
+record:
+  label: Record
+  id_prefix: DESC_
+
+# How we want Neo4j nodes to look
+entities:
+  PERSON:
+    labels: [Entity, Person]
+  ORG:
+    labels: [Entity, Organization]
+  GPE:
+    labels: [Entity, Location]
+
+# --- field extraction patterns from description text ---
+# Each pattern must contain a named group (?P<value>...)
+field_patterns:
+  person:
+    # Name = first "X Y" before the first comma
+    name:
+      patterns:
+        - '^(?P<value>[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s*,'
+
+    # Citizenship / nationality (Kenyan citizen, Ethiopian national, etc.)
+    citizenship:
+      patterns:
+        - '(?P<value>[A-Z][a-z]+)\s+citizen\b'
+        - '(?P<value>[A-Z][a-z]+)\s+national\b'
+
+    # Place of birth (born in Bahir Dar, born in Los Angeles)
+    place_of_birth:
+      patterns:
+        - 'born\s+in\s+(?P<value>[^,\.]+)'
+
+    # Passport number
+    passport_number:
+      patterns:
+        - 'passport\s+number\s*[: ]\s*(?P<value>[A-Z0-9]+)'
+        - 'passport\s*[: ]\s*(?P<value>[A-Z0-9]+)'
+        - 'Passport:\s*(?P<value>[A-Z0-9]+)'
+
+    # Flight number (flight ET345, KQ402, etc.)
+    flight_number:
+      patterns:
+        - 'flight\s+(?P<value>[A-Z0-9]+)'
+
+    # Amount of money carried (12,000 USD, 5,000 USD, etc.)
+    money:
+      patterns:
+        - '(?P<value>[\d,]+\s*(?:USD|usd|dollars?))'
+
+    # Driver's license (driver’s license is DL-7781, Driver’s license: DL-0098)
+    drivers_license:
+      patterns:
+        - 'driver.?s\s+license\s*(?:is|:)?\s*(?P<value>[A-Z0-9-]+)'
+
+    # License plate (License plate KH-1134, License plate: KDA-221B)
+    license_plate:
+      patterns:
+        - 'license\s+plate\s*(?:is|:)?\s*(?P<value>[A-Z0-9-]+)'
+
+    # Departure location (flew from X, traveled from X, departed from X)
+    departure_location:
+      patterns:
+        - '(?:flew|traveled)\s+from\s+(?P<value>[A-Z][A-Za-z\s]+?)(?:\s+to|\s+on|,|\.)'
+        - 'departed\s+from\s+(?P<value>[A-Z][A-Za-z\s]+?)(?:\s+on|\s+to|,|\.)'
+
+    # Arrival location (to Y / arrived in Y / arrived at Y)
+    arrival_location:
+      patterns:
+        - '\s+to\s+(?P<value>[A-Z][A-Za-z\s]+?)(?:\s+on|\s+via|,|\.)'
+        - 'arrived\s+in\s+(?P<value>[A-Z][A-Za-z\s]+?)(?:\s+on|,|\.)'
+        - 'arrived\s+at\s+(?P<value>[A-Z][A-Za-z\s]+?)(?:\s+on|,|\.)'
+
+    # Residence location (currently residing in Dubai, living in Mogadishu)
+    residence_location:
+      patterns:
+        - 'residing\s+in\s+(?P<value>[A-Z][A-Za-z\s]+)'
+        - 'living\s+in\s+(?P<value>[A-Z][A-Za-z\s]+)'
+
+    # Arrest location (arrested in/at X, arrested briefly in Manchester)
+    arrest_location:
+      patterns:
+        - 'arrested\s+(?:briefly\s+)?(?:in|at)\s+(?P<value>[A-Z][A-Za-z\s]+?)(?:\s+on|,|\.)'
+
+  organization:
+    name:
+      patterns:
+        - 'works\s+at\s+(?P<value>[A-Z][A-Za-z\s&]+)'
+        - 'works\s+with\s+(?P<value>[A-Z][A-Za-z\s&]+)'
+        - 'works\s+for\s+(?P<value>[A-Z][A-Za-z\s&]+)'
+        - 'employed\s+by\s+(?P<value>[A-Z][A-Za-z\s&]+)'
+        - 'consultant\s+for\s+(?P<value>[A-Z][A-Za-z\s&]+)'
+    address:
+      patterns: []
+
+# Which person fields should also create Location nodes + relationships
+location_relationships:
+  place_of_birth: BORN_IN
+  departure_location: DEPARTED_FROM
+  arrival_location: ARRIVED_AT
+  arrest_location: ARRESTED_AT
+  residence_location: LIVES_IN
